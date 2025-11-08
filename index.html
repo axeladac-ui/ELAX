@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELAX: LA HISTORIA (Serie Netflix)</title>
+    <style>
+        /* Estilos generales */
+        body {
+            background-color: #141414;
+            color: white;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* --- KEYFRAMES PARA LA ANIMACIÓN DE PORTADA --- */
+        @keyframes subtle-zoom {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.03); }
+        }
+
+        /* --- HEADER Y PORTADA (Simulando banner principal) --- */
+        header {
+            position: relative;
+            background-color: #000;
+            padding: 0;
+        }
+
+        .cover-image {
+            width: 100%;
+            height: 400px; 
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer; 
+            /* APLICACIÓN DE LA ANIMACIÓN: MOVIDA AQUÍ */
+            animation: subtle-zoom 15s ease-in-out alternate infinite; /* Ahora el contenedor se anima */
+        }
+
+        .cover-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
+            /* SE ELIMINA LA ANIMACIÓN DE AQUÍ */
+        }
+
+        .header-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            padding: 40px;
+            text-align: left;
+            z-index: 5;
+            background: linear-gradient(to top, rgba(20, 20, 20, 1) 0%, rgba(20, 20, 20, 0.2) 70%, rgba(20, 20, 20, 0) 100%);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .profile-image-container {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid white;
+            margin-bottom: 10px;
+            cursor: pointer; 
+        }
+
+        .profile-image-container .profile-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        h1 {
+            color: #E50914;
+            font-size: 4em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            margin: 0;
+        }
+
+        header p {
+            font-size: 1.5em;
+            color: #ccc;
+            margin-top: 5px;
+        }
+        
+        /* --- SECCIÓN DE EPISODIOS --- */
+        main {
+            padding: 40px;
+        }
+
+        h2 {
+            color: white;
+            font-size: 2.2em;
+            margin-bottom: 30px;
+            border-left: 5px solid #E50914;
+            padding-left: 15px;
+        }
+
+        .episodes-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            justify-content: center;
+        }
+
+        /* --- Estilos de la Tarjeta --- */
+        .episode-card {
+            background-color: #222;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            cursor: pointer; 
+        }
+
+        .episode-card:hover {
+            transform: scale(1.05); 
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
+            z-index: 10;
+        }
+
+        .episode-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 2px solid #E50914;
+            transition: transform 0.3s ease;
+        }
+        
+        .episode-card:hover img {
+            transform: scale(1.1); 
+        }
+
+        .episode-info {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .episode-info h3 {
+            color: #E50914;
+            font-size: 1.3em;
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+        
+        .episode-description {
+            font-size: 0.9em;
+            color: #ccc;
+            margin-bottom: 10px;
+            height: 40px; 
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; 
+            -webkit-box-orient: vertical;
+        }
+
+
+        /* --- ESTILOS DEL MODAL (Ventana emergente de texto y video) --- */
+        .modal {
+            display: none; 
+            position: fixed;
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9); 
+            padding-top: 50px;
+        }
+
+        .modal-content {
+            background-color: #1a1a1a;
+            margin: 5% auto; 
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 700px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .modal-content h3 {
+            color: #E50914;
+            font-size: 2em;
+            margin-top: 0;
+        }
+        
+        .modal-content .episode-link {
+            display: inline-block;
+            background-color: #E50914;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .modal-content .episode-link:hover {
+            background-color: #ff0000;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* --- ESTILOS DEL LIGHTBOX DE IMAGEN --- */
+        #image-lightbox {
+            display: none; 
+            position: fixed;
+            z-index: 2000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.95); 
+            text-align: center;
+        }
+
+        .lightbox-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .lightbox-content img {
+            max-width: 90%;
+            max-height: 90%;
+            margin: auto;
+            display: block;
+            border-radius: 5px;
+            animation: zoom-in 0.3s ease;
+        }
+
+        @keyframes zoom-in {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .close-lightbox {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+            z-index: 2001;
+        }
+
+        .close-lightbox:hover {
+            color: #bbb;
+        }
+
+        /* Estilos responsivos */
+        @media (max-width: 768px) {
+            .cover-image {
+                height: 300px;
+            }
+            .header-content {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2.5em;
+            }
+            .episodes-container {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+            .modal-content {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="cover-image clickable-image" data-image-url="https://i.postimg.cc/GHsdW4cn/portada.jpg">
+            <img src="https://i.postimg.cc/GHsdW4cn/portada.jpg" alt="Portada de ELAX: LA HISTORIA">
+        </div>
+        <div class="header-content">
+            <div class="profile-image-container clickable-image" data-image-url="https://i.postimg.cc/4NWyhcqn/PERFIL.jpg">
+                <img src="https://i.postimg.cc/4NWyhcqn/PERFIL.jpg" alt="Foto de Perfil de ELAX" class="profile-image">
+            </div>
+            <h1>ELAX: LA HISTORIA</h1>
+            <p>MÚSICA URBANA</p>
+        </div>
+    </header>
+
+    <main>
+        <h2>Temporada 1: Los Inicios (2016)</h2>
+                
+        <div class="episodes-container">
+            
+            <div class="episode-card episode-card-trigger" data-modal-target="modal-e1">
+                <img src="https://i.postimg.cc/mtFBvPbf/ay-vamos.jpg" alt="Miniatura de AY VAMOS (COVER)">
+                <div class="episode-info">
+                    <h3>EPISODIO 1: “AY VAMOS (COVER)”</h3>
+                    <p class="episode-description">T1:E1. El primer cover que marcó el inicio de ELAX en la escena urbana. Un tributo que muestra su talento inicial.</p>
+                </div>
+            </div>
+
+            <div class="episode-card episode-card-trigger" data-modal-target="modal-e2">
+                <img src="https://i.postimg.cc/56FbhXxc/ginza.jpg" alt="Miniatura de GINZA (COVER)">
+                <div class="episode-info">
+                    <h3>EPISODIO 2: “GINZA (COVER)”</h3>
+                    <p class="episode-description">T1:E2. Continúan los covers con este éxito del reggaetón. Muestra la versatilidad de ELAX al inicio de su carrera.</p>
+                </div>
+            </div>
+            
+            <div class="episode-card episode-card-trigger" data-modal-target="modal-e3">
+                <img src="https://i.postimg.cc/ykSsMD7w/si-no-estas.jpg" alt="Miniatura de SI NO ESTAS">
+                <div class="episode-info">
+                    <h3>EPISODIO 3: “SI NO ESTAS”</h3>
+                    <p class="episode-description">T1:E3. ELAX lanza su primer sencillo original, explorando temas de amor y desamor que definirían su estilo.</p>
+                </div>
+            </div>
+            
+            <div class="episode-card episode-card-trigger" data-modal-target="modal-e4">
+                <img src="https://i.postimg.cc/MvjqCnz4/hasta-el-amanecer.jpg" alt="Miniatura de HASTA EL AMANECER (COVER)">
+                <div class="episode-info">
+                    <h3>EPISODIO 4: “HASTA EL AMANECER (COVER)”</h3>
+                    <p class="episode-description">T1:E4. Otro popular cover que demuestra la habilidad de ELAX para reinterpretar grandes éxitos del género urbano.</p>
+                </div>
+            </div>
+            
+            <div class="episode-card episode-card-trigger" data-modal-target="modal-e5">
+                <img src="https://i.postimg.cc/BX14rjJk/tu-recuerdo.jpg" alt="Miniatura de TU RECUERDO">
+                <div class="episode-info">
+                    <h3>EPISODIO 5: “TU RECUERDO”</h3>
+                    <p class="episode-description">T1:E5. Un tema clave que consolidó su presencia en las plataformas, abordando la nostalgia y las promesas rotas.</p>
+                </div>
+            </div>
+            
+            <div class="episode-card episode-card-trigger" data-modal-target="modal-e6">
+                <img src="https://i.postimg.cc/JGBMfsR2/a-solas.jpg" alt="Miniatura de A SOLAS">
+                <div class="episode-info">
+                    <h3>EPISODIO 6: “A SOLAS”</h3>
+                    <p class="episode-description">T1:E6. Una canción más introspectiva que explora la soledad y la reflexión personal en medio de su crecimiento artístico.</p>
+                </div>
+            </div>
+            
+            <div class="episode-card episode-card-trigger" data-modal-target="modal-e7">
+                <img src="https://i.postimg.cc/3dDYsk3z/vives-en-mi.jpg" alt="Miniatura de VIVES EN MI">
+                <div class="episode-info">
+                    <h3>EPISODIO 7: “VIVES EN MI”</h3>
+                    <p class="episode-description">T1:E7. Un emotivo tema que habla de un amor inolvidable, mostrando una faceta más melódica de ELAX.</p>
+                </div>
+            </div>
+
+            <div class="episode-card episode-card-trigger" data-modal-target="modal-e8">
+                <img src="https://i.postimg.cc/zXxvRh6Y/BACK-STAGE.jpg" alt="Miniatura de BACK STAGE">
+                <div class="episode-info">
+                    <h3>EPISODIO 8: “BACK STAGE (TU RECUERDO)”</h3>
+                    <p class="episode-description">T1:E8. Un vistazo exclusivo detrás de cámaras, revelando el proceso de creación y grabación del tema "Tu Recuerdo".</p>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <div id="modal-e1" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal-close="modal-e1">&times;</span>
+            <h3>EPISODIO 1: “AY VAMOS (COVER)”</h3>
+            <p><strong>T1:E1.</strong> Este episodio marca el verdadero punto de partida de ELAX como artista urbano. Es el primer cover con el que logró captar la atención de un público más amplio. La descripción completa del episodio detalla el proceso de selección de esta canción y el impacto inmediato que tuvo en sus seguidores, consolidando su compromiso con el género.</p>
+            <a href="https://youtu.be/_Ex2rmWPajI?si=-mCfqMrSzBhjUizi" target="_blank" class="episode-link">▶ Ir al Video</a>
+        </div>
+    </div>
+
+    <div id="modal-e2" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal-close="modal-e2">&times;</span>
+            <h3>EPISODIO 2: “GINZA (COVER)”</h3>
+            <p><strong>T1:E2.</strong> Siguiendo la fórmula exitosa del primer cover, ELAX aborda otro gran hit del reggaetón. La descripción explora cómo ELAX le dio su propio toque distintivo a un éxito ya establecido, demostrando su capacidad de adaptación y creatividad musical mientras seguía construyendo su base de fans.</p>
+            <a href="https://youtu.be/5LpGXzy6Ymc?si=ERdupAag12527m6d" target="_blank" class="episode-link">▶ Ir al Video</a>
+        </div>
+    </div>
+
+    <div id="modal-e3" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal-close="modal-e3">&times;</span>
+            <h3>EPISODIO 3: “SI NO ESTAS”</h3>
+            <p><strong>T1:E3.</strong> Un momento crucial: el primer sencillo original. Este episodio profundiza en la transición de ELAX de covers a material propio. La canción "Si No Estás" establece el tono emocional y la temática de desamor que se convertirían en sellos distintivos de su música en esta etapa inicial.</p>
+            <a href="https://youtu.be/2SYJ_rgngLc?si=PjD3_iOzZJBBfS9v" target="_blank" class="episode-link">▶ Ir al Video</a>
+        </div>
+    </div>
+
+    <div id="modal-e4" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal-close="modal-e4">&times;</span>
+            <h3>EPISODIO 4: “HASTA EL AMANECER (COVER)”</h3>
+            <p><strong>T1:E4.</strong> Un regreso temporal a los covers, esta vez con una producción más pulida, demostrando el rápido aprendizaje en la calidad de su trabajo audiovisual y sonoro. La descripción completa aborda cómo ELAX usó este lanzamiento para mantener el momentum mientras preparaba más sencillos originales.</p>
+            <a href="https://youtu.be/L4L1xASDy0Q?si=1DeeFvxz3PHdl8kq" target="_blank" class="episode-link">▶ Ir al Video</a>
+        </div>
+    </div>
+
+    <div id="modal-e5" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal-close="modal-e5">&times;</span>
+            <h3>EPISODIO 5: “TU RECUERDO”</h3>
+            <p><strong>T1:E5.</strong> Considerada una de las canciones más importantes de sus inicios. Este episodio se centra en la alta producción de "Tu Recuerdo", que fue clave para su consolidación. La descripción detalla el proceso creativo y la grabación del video, resaltando el crecimiento artístico y profesional de ELAX.</p>
+            <a href="https://youtu.be/M-DZMvsaIZA?si=bh6mTrPWtUG5DycO" target="_blank" class="episode-link">▶ Ir al Video</a>
+        </div>
+    </div>
+
+    <div id="modal-e6" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal-close="modal-e6">&times;</span>
+            <h3>EPISODIO 6: “A SOLAS”</h3>
+            <p><strong>T1:E6.</strong> Una pieza más experimental e introspectiva, "A Solas" ofrece una mirada a la complejidad emocional del artista. La descripción completa revela las inspiraciones detrás de la letra y cómo este tema sirvió para explorar un lado más maduro de su música, fuera de los ritmos puramente bailables.</p>
+            <a href="https://youtu.be/3QAGc_oKhlo?si=xT77jPr3wUnZltjs" target="_blank" class="episode-link">▶ Ir al Video</a>
+        </div>
+    </div>
+
+    <div id="modal-e7" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal-close="modal-e7">&times;</span>
+            <h3>EPISODIO 7: “VIVES EN MI”</h3>
+            <p><strong>T1:E7.</strong> El emotivo tema "Vives en Mí" cierra la fase inicial de esta temporada, siendo una balada urbana que destaca su rango vocal y capacidad para transmitir sentimientos profundos. La descripción relata la conexión personal de ELAX con la canción y la respuesta abrumadora de los fans.</p>
+            <a href="https://youtu.be/k-4Mdz28DIs?si=T0DQBtUf7cjYCgZv" target="_blank" class="episode-link">▶ Ir al Video</a>
+        </div>
+    </div>
+
+    <div id="modal-e8" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal-close="modal-e8">&times;</span>
+            <h3>EPISODIO 8: “BACK STAGE (TU RECUERDO)”</h3>
+            <p><strong>T1:E8.</strong> El final de temporada ofrece un contenido especial. Este vistazo detrás de cámaras de "Tu Recuerdo" es un regalo para los fans, revelando el ambiente de trabajo, los desafíos de la filmación y el equipo detrás de la producción. Una mirada cruda y personal al proceso creativo.</p>
+            <a href="https://youtu.be/xDhTOnUha7Q?si=kIMwOWPPAgjSm7Mp" target="_blank" class="episode-link">▶ Ir al Video</a>
+        </div>
+    </div>
+
+    <div id="image-lightbox">
+        <span class="close-lightbox" id="close-image-lightbox">&times;</span>
+        <div class="lightbox-content">
+            <img id="lightbox-image" src="" alt="Imagen ampliada de ELAX">
+        </div>
+    </div>
+
+
+    <script>
+        // --- JAVASCRIPT PARA GESTIONAR AMBOS TIPOS DE MODAL (Texto/Video y Lightbox de Imagen) ---
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // --- MODAL DE EPISODIOS (TEXTO) ---
+            const triggers = document.querySelectorAll('.episode-card-trigger');
+            const closeButtons = document.querySelectorAll('.close');
+            
+            triggers.forEach(trigger => {
+                trigger.addEventListener('click', function() {
+                    const modalId = this.getAttribute('data-modal-target');
+                    const modal = document.getElementById(modalId);
+                    modal.style.display = 'block';
+                    document.body.style.overflow = 'hidden'; 
+                });
+            });
+
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const modalId = this.getAttribute('data-modal-close');
+                    const modal = document.getElementById(modalId);
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto'; 
+                });
+            });
+
+            // --- LIGHTBOX DE IMAGEN (NUEVA FUNCIONALIDAD) ---
+            const imageTriggers = document.querySelectorAll('.clickable-image');
+            const lightbox = document.getElementById('image-lightbox');
+            const lightboxImage = document.getElementById('lightbox-image');
+            const closeLightboxButton = document.getElementById('close-image-lightbox');
+            
+            // 1. ABRIR LIGHTBOX al hacer clic en imagen
+            imageTriggers.forEach(trigger => {
+                trigger.addEventListener('click', function() {
+                    let imageUrl = '';
+                    // Prioriza el data-image-url del contenedor
+                    if (this.hasAttribute('data-image-url')) {
+                        imageUrl = this.getAttribute('data-image-url');
+                    } else if (this.querySelector('img')) { // Si no, busca la imagen dentro
+                        imageUrl = this.querySelector('img').src;
+                    }
+                    
+                    if (imageUrl) {
+                        lightboxImage.src = imageUrl;
+                        lightbox.style.display = 'block';
+                        document.body.style.overflow = 'hidden'; 
+                    }
+                });
+            });
+
+            // 2. CERRAR LIGHTBOX al hacer clic en la 'x'
+            closeLightboxButton.addEventListener('click', function() {
+                lightbox.style.display = 'none';
+                document.body.style.overflow = 'auto'; 
+            });
+
+            // 3. CERRAR AMBOS MODALS al hacer clic fuera de su contenido
+            window.onclick = function(event) {
+                // Para modal de texto
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                    document.body.style.overflow = 'auto'; 
+                }
+                // Para lightbox de imagen
+                if (event.target === lightbox) {
+                    lightbox.style.display = 'none';
+                    document.body.style.overflow = 'auto'; 
+                }
+            }
+        });
+    </script>
+</body>
+</html>
